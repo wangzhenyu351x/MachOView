@@ -91,6 +91,8 @@ using namespace std;
   return node;
 }
 
+extern BOOL needDumpMethName;
+
 //-----------------------------------------------------------------------------
 -(MVNode *)createCStringsNode:(MVNode *)parent
                       caption:(NSString *)caption
@@ -103,9 +105,21 @@ using namespace std;
   NSRange range = NSMakeRange(location,0);
   NSString * lastReadHex;
 
+    NSString *sectname = parent.userInfo[@"sectname"];
+    NSMutableString *strM = nil;
+
+    if (needDumpMethName && sectname && [@"__objc_methname" isEqualToString:sectname]) {
+        strM = @"".mutableCopy;
+        needDumpMethName = NO;
+    }
+
   while (NSMaxRange(range) < location + length)
   {
     NSString * symbolName = [dataController read_string:range lastReadHex:&lastReadHex];
+
+  if (strM) {
+      [strM appendFormat:@"%@\n",symbolName];
+  }
     
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                            :lastReadHex
@@ -128,6 +142,15 @@ using namespace std;
                       forKey:[NSNumber numberWithUnsignedLongLong:rva64]];
     }
   }
+
+    if (strM) {
+        NSString *const filePath = [NSString stringWithFormat:@"/Users/zhenyu/Downloads/dump%d.txt",arc4random_uniform(1000)];
+//        NSData *const data = [strM.copy dataUsingEncoding:NSUTF8StringEncoding];
+        [strM.copy writeToFile:filePath atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            needDumpMethName = YES;
+        });
+    }
   
   return node;
 }
