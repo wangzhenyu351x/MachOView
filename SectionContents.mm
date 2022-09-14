@@ -115,7 +115,22 @@ extern BOOL needDumpMethName;
 
   while (NSMaxRange(range) < location + length)
   {
-    NSString * symbolName = [dataController read_string:range lastReadHex:&lastReadHex];
+      NSString * symbolName = nil;
+      if ([sectname isEqualToString:@"__ustring"]) {
+          // 根据地址和范围，解析value字符串
+          symbolName = [dataController read_16string:range lastReadHex:&lastReadHex];
+      } else {
+          // 根据地址和范围，解析value字符串
+          symbolName = [dataController read_string:range lastReadHex:&lastReadHex];
+      }
+      
+      NSUInteger len = 0;
+      if ([self isChineseWithStr:symbolName]) {
+          NSString *lenStr = [symbolName stringByReplacingOccurrencesOfString:@"\0" withString:@""];
+          len = [lenStr lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+      } else {
+          len = [symbolName length];
+      }
 
   if (strM) {
       [strM appendFormat:@"%@\n",symbolName];
@@ -123,7 +138,7 @@ extern BOOL needDumpMethName;
     
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location]
                            :lastReadHex
-                           :[NSString stringWithFormat:@"CString (length:%lu)", [symbolName length]]
+                           :[NSString stringWithFormat:@"CString (length:%lu)", len]
                            :symbolName];
     
     [node.details setAttributes:MVMetaDataAttributeName,symbolName,nil];
@@ -153,6 +168,24 @@ extern BOOL needDumpMethName;
     }
   
   return node;
+}
+
+- (BOOL)isChineseWithStr:(NSString *)str {
+    
+    for(NSUInteger i = 0; i < [str length]; i++)
+    {
+        int a = [str characterAtIndex:i];
+        
+        if( a > 0x4e00 && a < 0x9fff)
+        {
+            return YES;
+        }
+        else
+        {
+            return NO;
+        }
+    }
+    return NO;
 }
 
 //-----------------------------------------------------------------------------

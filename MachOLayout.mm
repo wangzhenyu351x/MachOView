@@ -1306,7 +1306,12 @@ struct CompareSectionByName
     
     @try
     {
-      switch (section_64->flags & SECTION_TYPE)
+        unsigned int value = section_64->flags & SECTION_TYPE;
+        const int comperValue = strcmp(section_64->sectname, "__ustring");
+        if (comperValue == 0) {
+            value = S_CSTRING_LITERALS;
+        }
+      switch (value)
       {
         case S_CSTRING_LITERALS: 
           [self createCStringsNode:sectionNode 
