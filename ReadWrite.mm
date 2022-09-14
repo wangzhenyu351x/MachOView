@@ -145,7 +145,11 @@
 - (NSString *)read_string:(NSRange &)range lastReadHex:(NSString **)lastReadHex
 {
   range.location = NSMaxRange(range);
-  NSString * str = NSSTRING((uint8_t *)[fileData bytes] + range.location);
+//  NSString * str = NSSTRING((uint8_t *)[fileData bytes] + range.location);
+  // 转成uint8_t字符串，如："\x11b"
+  uint8_t *cstr = (uint8_t *)[fileData bytes] + range.location;
+  // 转成真实值，如："b"
+  NSString *str = NSSTRING(cstr);
   range.length = [str length] + 1;
   if (lastReadHex) *lastReadHex = [self getHexStr:range];
   return [self replaceEscapeCharsInString:str];

@@ -153,8 +153,13 @@ extern BOOL needDumpMethName;
     else
     {
       uint64_t rva64 = [self fileOffsetToRVA64:range.location];
-      [symbolNames setObject:[NSString stringWithFormat:@"0x%qX:\"%@\"", rva64, symbolName]
-                      forKey:[NSNumber numberWithUnsignedLongLong:rva64]];
+//      [symbolNames setObject:[NSString stringWithFormat:@"0x%qX:\"%@\"", rva64, symbolName]
+//                      forKey:[NSNumber numberWithUnsignedLongLong:rva64]];
+        // %qX:打印成大写的16进制
+        NSString *name = [NSString stringWithFormat:@"0x%qX:\"%@\"", rva64, symbolName];
+        // 新增一行数据
+        [symbolNames setObject:name
+                               forKey:[NSNumber numberWithUnsignedLongLong:rva64]];
     }
   }
 

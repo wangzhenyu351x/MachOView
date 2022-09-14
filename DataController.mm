@@ -57,7 +57,8 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 //============================================================================
 @implementation MVColoumns
 
-@synthesize offsetStr, dataStr, descriptionStr, valueStr; 
+@synthesize offsetStr, dataStr, descriptionStr;
+@synthesize valueStr = _valueStr;
 
 //-----------------------------------------------------------------------------
 - (id)init 
@@ -80,7 +81,7 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
     offsetStr = col0;
     dataStr = col1;
     descriptionStr = col2;
-    valueStr = col3;
+    _valueStr = col3;
     
 #ifdef MV_STATISTICS
     OSAtomicIncrement64(&nrow_loaded);
@@ -93,6 +94,10 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 +(MVColoumns *) coloumnsWithData:(NSString *)col0 :(NSString *)col1 :(NSString *)col2 :(NSString *)col3
 {
   return [[MVColoumns alloc] initWithData:col0:col1:col2:col3];
+}
+
+- (NSString *)valueStr {
+    return _valueStr;
 }
 
 //-----------------------------------------------------------------------------
@@ -163,7 +168,18 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
 //-----------------------------------------------------------------------------
 - (void)writeString:(NSString *)str toFile:(FILE *)pFile
 {
-  fwrite(CSTRING(str), [str length] + 1, 1, pFile);
+//  fwrite(CSTRING(str), [str length] + 1, 1, pFile);
+        if(str){
+            const char *s = [str cStringUsingEncoding:[NSString defaultCStringEncoding]];
+//            char *s2 = NULL;
+    //        if (strcmp(s, s2) == 0) {
+            if(s == NULL) {
+                const char *s1 = [str cStringUsingEncoding:NSUTF8StringEncoding];
+                fwrite(s1, [str length] + 1, 1, pFile);
+            } else {
+                fwrite(s, [str length] + 1, 1, pFile);
+            }
+        }
 }
 
 //-----------------------------------------------------------------------------
@@ -1323,10 +1339,10 @@ NSString * const MVStatusTaskTerminated           = @"MVStatusTaskTerminated";
         }
         fclose(pFile);
 
-        for (id <MVSerializing> serializable in objectsToSave)
-        {
-          [serializable clear];
-        }
+//        for (id <MVSerializing> serializable in objectsToSave)
+//        {
+//          [serializable clear];
+//        }
         
         // reset buffer
         objectsToSave = [[NSMutableArray alloc] init];

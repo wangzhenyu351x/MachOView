@@ -46,7 +46,6 @@ struct MVNodeSaver;
   NSString *            offsetStr;
   NSString *            dataStr;
   NSString *            descriptionStr;
-  NSString *            valueStr;
 }
 
 @property (nonatomic)   NSString * offsetStr;
